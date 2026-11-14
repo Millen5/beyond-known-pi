@@ -1,41 +1,32 @@
-# BEYOND THE KNOWN
+# BEYOND THE KNOWN — Testnet Preview
 
-A responsive knowledge and discovery website connecting readers to the BEYOND THE KNOWN Blogger publication.
+This branch, `testnet-hosting`, is a separate preview build intended for Pi Testnet preparation and review. It is not the Mainnet deployment.
 
-## Live website
+## Current state
 
-After GitHub Pages is enabled for the `main` branch and repository root, the site is served from the repository's GitHub Pages URL.
+- Responsive static website for desktop and mobile.
+- Topic links to the BEYOND THE KNOWN Blogger publication.
+- Explicit Testnet Preview banner to distinguish this branch from Mainnet.
+- Pi authentication, payments, wallet transactions, and memberships are not active.
+- No wallet passphrase, private key, or secret is requested or stored by this static site.
 
-## Current features
+## Files
 
-- Responsive homepage for mobile and desktop
-- Topic navigation: Science & Space, Artificial Intelligence, Crypto & Blockchain, Financial Markets, and Mysteries & Discovery
-- Links to the existing Blogger articles and topic labels
-- About and Pi ecosystem roadmap sections
-- Privacy Policy page
-- Security notice explaining that Pi payments and authentication are not active yet
+- `index.html` — Testnet preview homepage.
+- `privacy.html` — privacy information for the current static version.
+- `signin/callback.html` — OAuth callback scaffold only; not production-ready and must not be treated as an active sign-in integration.
+- `validation-key.txt` — Pi Developer Portal domain-validation file. Preserve it; do not publish its contents in documentation or remove it without a specific reason.
 
-## Project files
+## Hosting note
 
-- `index.html` — homepage
-- `privacy.html` — privacy policy
-- `signin/callback.html` — Pi OAuth callback handler scaffold (requires a verified Testnet domain and registered redirect URI before sign-in can be activated)
-- `validation-key.txt` — Pi Developer Portal domain validation file; do not remove or modify without a specific reason
+GitHub Pages for a repository uses one configured publishing source at a time. The existing Mainnet site uses the `main` branch. Do not switch that publishing source to `testnet-hosting`, because doing so could replace the Mainnet website.
 
-## Deployment
+A separate Testnet deployment needs a separate hosting project or a separate repository/site. Cloudflare Pages setup has not yet been completed. The free GitHub Pages project URL for the Mainnet site is not automatically a separate verified Testnet domain.
 
-In GitHub, open **Settings → Pages** and confirm:
-1. Build and deployment source is **Deploy from a branch**.
-2. Branch is **main**.
-3. Folder is **/(root)**.
-4. Save, then wait for the Pages deployment to finish.
+## Pi integration and safety
 
-Do not change the existing Pi Developer Portal domain settings while a listing or verification review is pending.
+Pi authentication and payments are not implemented in this static preview. A secure server-side integration, correct Testnet app configuration, registered redirect URI, and end-to-end tests are required before enabling them. Never request or collect a visitor's Pi Wallet passphrase.
 
-## Pi integration status
+## Publication
 
-Pi authentication, server-side payment verification, memberships, and other transactional features are **not implemented in this static release**. They require the official Pi SDK plus a secure backend. Never collect or request a user's Pi Wallet passphrase.
-
-## Content
-
-Main publication: https://beyondknownstories.blogspot.com/
+https://beyondknownstories.blogspot.com/
