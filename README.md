@@ -19,6 +19,7 @@ After GitHub Pages is enabled for the `main` branch and repository root, the sit
 
 - `index.html` — homepage
 - `privacy.html` — privacy policy
+- `signin/callback.html` — Pi OAuth callback handler scaffold (requires a verified Testnet domain and registered redirect URI before sign-in can be activated)
 - `validation-key.txt` — Pi Developer Portal domain validation file; do not remove or modify without a specific reason
 
 ## Deployment
