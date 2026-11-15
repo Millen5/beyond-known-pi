@@ -1,6 +1,6 @@
 function getSessionToken(request) {
   const cookie = request.headers.get("Cookie") || "";
-  const match = cookie.match(/(?:^|;\\s*)btk_pi_session=([^;]+)/);
+  const match = cookie.match(/(?:^|;\s*)btk_pi_session=([^;]+)/);
   if (!match) return "";
   try { return decodeURIComponent(match[1]); } catch { return ""; }
 }
