@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#100c22">
 <meta name="description" content="BEYOND THE KNOWN — explore science, space, artificial intelligence, blockchain, financial markets and new ideas.">
 <title>BEYOND THE KNOWN | Knowledge Beyond Limits</title>
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23100c22'/%3E%3Ctext x='50' y='68' font-size='62' text-anchor='middle' fill='%23ffc56a'%3EB%3C/text%3E%3C/svg%3E">
 <style>
@@ -23,7 +24,7 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 <body>
 <header><div class="wrap nav"><a class="brand" href="#home">✦ BEYOND <span>THE KNOWN</span></a><nav class="links" aria-label="Main navigation"><a href="#discover">Discover</a><a href="#about">About</a><a href="#pi">Pi Journey</a><a href="https://beyondknownstories.blogspot.com/" target="_blank" rel="noopener noreferrer">Blog ↗</a></nav></div></header>
 <main>
-<section class="hero" id="home"><div class="wrap"><div class="eyebrow">Knowledge · Innovation · Discovery</div><div class="testnet-banner" role="status">Testnet Preview · Experimental Environment</div><h1>Go <em>beyond</em> what you know.</h1><p class="lead">Explore the ideas shaping our universe and our future — from space and artificial intelligence to blockchain, financial literacy and the mysteries of our world.</p><div class="actions"><a class="btn gold" href="#discover">Explore Topics</a><a class="btn" href="https://beyondknownstories.blogspot.com/" target="_blank" rel="noopener noreferrer">Read the Blog ↗</a><button class="btn" id="pi-signin" type="button">Sign in with Pi</button></div></div></section>
+<section class="hero" id="home"><div class="wrap"><div class="eyebrow">Knowledge · Innovation · Discovery</div><div class="testnet-banner" role="status">Testnet Preview · Experimental Environment</div><h1>Go <em>beyond</em> what you know.</h1><p class="lead">Explore the ideas shaping our universe and our future — from space and artificial intelligence to blockchain, financial literacy and the mysteries of our world.</p><div class="actions"><a class="btn gold" href="#discover">Explore Topics</a><a class="btn" href="https://beyondknownstories.blogspot.com/" target="_blank" rel="noopener noreferrer">Read the Blog ↗</a><button class="btn" id="pi-signin" type="button">Sign in with Pi</button></div><p id="pi-auth-status" class="muted" role="status" aria-live="polite"></p></div></section>
 <section id="discover"><div class="wrap"><div class="eyebrow">Explore our universe</div><h2>Curiosity has no limits.</h2><p class="muted">Choose a field of discovery. Our articles and stories are published on the BEYOND THE KNOWN blog.</p><div class="grid">
 <a class="card" href="https://beyondknownstories.blogspot.com/search/label/Science%20%26%20Space"><div class="symbol">🌌</div><h3>Science &amp; Space</h3><p>Explore the universe, scientific breakthroughs and the questions that move discovery forward.</p></a>
 <a class="card" href="https://beyondknownstories.blogspot.com/search/label/Artificial%20Intelligence"><div class="symbol">🤖</div><h3>Artificial Intelligence</h3><p>Understand emerging technology, intelligent systems and their impact on everyday life.</p></a>
@@ -38,16 +39,58 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 <footer><div class="wrap foot"><span>© <span id="year">2026</span> BEYOND THE KNOWN</span><span>Educational content only · Not financial advice</span><span><a href="privacy.html">Privacy Policy</a></span></div></footer>
 <script>
 document.getElementById("year").textContent=new Date().getFullYear();
-document.getElementById("pi-signin").addEventListener("click",()=>{
-  const state=Array.from(crypto.getRandomValues(new Uint8Array(32)),b=>b.toString(16).padStart(2,"0")).join("");
-  sessionStorage.setItem("btk_pi_oauth_state",state);
-  const url=new URL("https://accounts.pinet.com/oauth/authorize");
-  url.searchParams.set("response_type","token");
-  url.searchParams.set("client_id","I4gnS3cE9cZaYyZLeDnCk_SqandkVrsdxgvFWw9u98I");
-  url.searchParams.set("redirect_uri","https://beyond-known-pi.pages.dev/signin/callback.html");
-  url.searchParams.set("scope","username");
-  url.searchParams.set("state",state);
-  window.location.assign(url.toString());
+const piStatus=document.getElementById("pi-auth-status");
+const piButton=document.getElementById("pi-signin");
+let piReady=false;
+if(window.Pi){
+  try{
+    Pi.init({version:"2.0",sandbox:true});
+    piReady=true;
+  }catch(error){
+    piStatus.textContent="Pi SDK could not initialize. Please reopen this app in Pi Browser.";
+  }
+}else{
+  piStatus.textContent="Open BEYOND THE KNOWN inside Pi Browser to use Pi Sign-In.";
+}
+piButton.addEventListener("click",async()=>{
+  if(!piReady||!window.Pi){
+    piStatus.textContent="Pi Sign-In is available inside Pi Browser. Please open this app there.";
+    return;
+  }
+  piButton.disabled=true;
+  piStatus.textContent="Waiting for Pi authentication…";
+  try{
+    const auth=await Pi.authenticate(["username"],()=>{});
+    if(!auth||!auth.accessToken){
+      throw new Error("Pi did not return an access token.");
+    }
+    const response=await fetch("/api/pi/verify",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      credentials:"same-origin",
+      body:JSON.stringify({accessToken:auth.accessToken})
+    });
+    const data=await response.json();
+    if(!response.ok||!data.verified||!data.user||!data.user.uid){
+      throw new Error(data.error||"Pi identity verification failed.");
+    }
+    sessionStorage.setItem("btk_pi_user",JSON.stringify({
+      uid:data.user.uid,
+      username:data.user.username||""
+    }));
+    piStatus.textContent="Signed in successfully"+(data.user.username?" as @"+data.user.username:"")+". Your Pi identity has been verified.";
+    piButton.textContent="Signed in with Pi";
+  }catch(error){
+    piStatus.textContent=error&&error.message?error.message:"Pi Sign-In was not completed. Please try again.";
+    piButton.disabled=false;
+  }
 });
+try{
+  const saved=JSON.parse(sessionStorage.getItem("btk_pi_user")||"null");
+  if(saved&&saved.uid){
+    piStatus.textContent="Signed in"+(saved.username?" as @"+saved.username:"")+".";
+    piButton.textContent="Signed in with Pi";
+  }
+}catch(_){}
 </script>
 </body></html>
