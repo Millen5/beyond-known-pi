@@ -43,32 +43,40 @@ const piStatus=document.getElementById("pi-auth-status");
 const piButton=document.getElementById("pi-signin");
 const PI_CLIENT_ID="I4gnS3cE9cZaYyZLeDnCk_SqandkVrsdxgvFWw9u98I";
 const PI_REDIRECT_URI="https://beyond-known-pi.pages.dev/signin/callback.html";
-piButton.disabled=false;
-piStatus.textContent="Use Pi Sign-In to securely verify your Pi identity.";
-piButton.addEventListener("click",()=>{
+function showSignedOut(message="Use Pi Sign-In to securely verify your Pi identity."){
+  piButton.textContent="Sign in with Pi"; piButton.disabled=false; piButton.onclick=startPiSignIn; piStatus.textContent=message;
+}
+function showSignedIn(username){
+  piButton.textContent="Log out"; piButton.disabled=false; piButton.onclick=logoutPi;
+  piStatus.textContent="Pi identity verified"+(username?" for @"+username:"")+".";
+}
+function startPiSignIn(){
   try{
     const state=Array.from(crypto.getRandomValues(new Uint8Array(24)),b=>b.toString(16).padStart(2,"0")).join("");
     sessionStorage.setItem("btk_pi_oauth_state",state);
     const authorize=new URL("https://accounts.pinet.com/oauth/authorize");
-    authorize.searchParams.set("response_type","token");
-    authorize.searchParams.set("client_id",PI_CLIENT_ID);
-    authorize.searchParams.set("redirect_uri",PI_REDIRECT_URI);
-    authorize.searchParams.set("scope","username");
-    authorize.searchParams.set("state",state);
-    piStatus.textContent="Redirecting to Pi secure sign-in…";
+    authorize.searchParams.set("response_type","token"); authorize.searchParams.set("client_id",PI_CLIENT_ID);
+    authorize.searchParams.set("redirect_uri",PI_REDIRECT_URI); authorize.searchParams.set("scope","username");
+    authorize.searchParams.set("state",state); piStatus.textContent="Redirecting to Pi secure sign-in…";
     window.location.assign(authorize.toString());
-  }catch(error){
-    sessionStorage.removeItem("btk_pi_oauth_state");
-    piStatus.textContent="Pi Sign-In could not start. Please refresh and try again.";
-  }
-});
-try{
-  const saved=JSON.parse(sessionStorage.getItem("btk_pi_user")||"null");
-  if(saved&&saved.uid){
-    piStatus.textContent="Pi identity verified"+(saved.username?" for @"+saved.username:"")+".";
-    piButton.textContent="Pi identity verified";
-    piButton.disabled=true;
-  }
-}catch(_){}
+  }catch(error){sessionStorage.removeItem("btk_pi_oauth_state");piStatus.textContent="Pi Sign-In could not start. Please refresh and try again.";}
+}
+async function logoutPi(){
+  piButton.disabled=true; piStatus.textContent="Signing out…";
+  try{
+    const response=await fetch("/api/pi/logout",{method:"POST",credentials:"same-origin"});
+    if(!response.ok) throw new Error("Logout could not be completed.");
+    showSignedOut("You have been signed out of BEYOND THE KNOWN.");
+  }catch(error){piButton.disabled=false;piButton.textContent="Log out";piButton.onclick=logoutPi;piStatus.textContent="Logout failed. Please try again.";}
+}
+async function restorePiSession(){
+  try{
+    const response=await fetch("/api/pi/session",{method:"GET",credentials:"same-origin",cache:"no-store"});
+    if(!response.ok){showSignedOut();return;}
+    const data=await response.json();
+    if(data.verified&&data.user&&data.user.uid) showSignedIn(data.user.username||""); else showSignedOut();
+  }catch(error){showSignedOut("Unable to check your Pi session. Please refresh.");}
+}
+showSignedOut(); restorePiSession();
 </script>
 </body></html>
