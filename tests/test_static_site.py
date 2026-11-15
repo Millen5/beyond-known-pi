@@ -19,7 +19,7 @@ class LinkParser(HTMLParser):
 
 class StaticSiteTests(unittest.TestCase):
     def test_required_pages_and_api_exist(self):
-        for name in ("index.html", "privacy.html", "404.html", "robots.txt",
+        for name in ("index.html", "privacy.html", "terms.html", "404.html", "robots.txt",
                      "signin/callback.html", "functions/api/pi/verify.js"):
             with self.subTest(name=name):
                 self.assertTrue((ROOT / name).is_file())
@@ -27,6 +27,8 @@ class StaticSiteTests(unittest.TestCase):
     def test_homepage_uses_official_pi_sdk(self):
         html = (ROOT / "index.html").read_text(encoding="utf-8")
         self.assertIn("Testnet Preview", html)
+        self.assertIn('href="privacy.html"', html)
+        self.assertIn('href="terms.html"', html)
         self.assertIn("does not currently process Pi payments", html)
         self.assertIn("Pi Wallet passphrase", html)
         self.assertIn("Sign in with Pi", html)
@@ -68,7 +70,7 @@ class StaticSiteTests(unittest.TestCase):
             self.assertNotRegex(content, r"(?i)(?:api[_-]?secret|private[_-]?key)\s*[:=]\s*['\"][^'\"]{12,}")
 
     def test_local_links_resolve(self):
-        for page in (ROOT / "index.html", ROOT / "privacy.html", ROOT / "404.html", ROOT / "signin/callback.html"):
+        for page in (ROOT / "index.html", ROOT / "privacy.html", ROOT / "terms.html", ROOT / "404.html", ROOT / "signin/callback.html"):
             parser = LinkParser()
             parser.feed(page.read_text(encoding="utf-8"))
             for href in parser.links:
