@@ -41,56 +41,42 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 document.getElementById("year").textContent=new Date().getFullYear();
 const piStatus=document.getElementById("pi-auth-status");
 const piButton=document.getElementById("pi-signin");
+const PI_CLIENT_ID="I4gnS3cE9cZaYyZLeDnCk_SqandkVrsdxgvFWw9u98I";
+const PI_REDIRECT_URI="https://beyond-known-pi.pages.dev/signin/callback.html";
 let piReady=false;
 (async()=>{
-  if(!window.Pi){
-    piStatus.textContent="Pi SDK is unavailable. Please refresh this page inside Pi Browser.";
+  if(!window.Pi||typeof window.Pi.init!=="function"||typeof window.Pi.signIn!=="function"){
+    piStatus.textContent="Pi Sign-In SDK is unavailable. Please open this page in Pi Browser and refresh.";
     return;
   }
   try{
-    await window.Pi.init({version:"2.0",sandbox:true});
+    await window.Pi.init({version:"2.0"});
     piReady=true;
-    piStatus.textContent="Pi Testnet is ready. Sign in securely with Pi.";
+    piStatus.textContent="Pi Sign-In is ready. You can securely continue with Pi.";
+    piButton.disabled=false;
   }catch(error){
-    piStatus.textContent="Pi SDK could not initialize. Please refresh and try again.";
+    piStatus.textContent="Pi Sign-In could not initialize. Please refresh and try again.";
   }
 })();
-piButton.addEventListener("click",async()=>{
-  if(!piReady||!window.Pi){
-    piStatus.textContent="Pi is still initializing. Please wait a moment and try again.";
+piButton.disabled=true;
+piButton.addEventListener("click",()=>{
+  if(!piReady||!window.Pi||typeof window.Pi.signIn!=="function"){
+    piStatus.textContent="Pi Sign-In is still initializing. Please wait and try again.";
     return;
   }
-  piButton.disabled=true;
-  piStatus.textContent="Waiting for Pi approval…";
   try{
-    const auth=await Promise.race([
-      window.Pi.authenticate(["username"],()=>{}),
-      new Promise((_,reject)=>setTimeout(()=>reject(new Error("Pi approval did not return a response within 60 seconds. Close this message, refresh Pi Browser and try once more.")),60000))
-    ]);
-    if(!auth||!auth.accessToken){
-      throw new Error("Pi did not return an access token. Please try signing in again.");
-    }
-    piStatus.textContent="Pi approval received. Verifying your identity securely…";
-    const response=await fetch("/api/pi/verify",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      credentials:"same-origin",
-      cache:"no-store",
-      body:JSON.stringify({accessToken:auth.accessToken})
+    const state=Array.from(crypto.getRandomValues(new Uint8Array(24)),b=>b.toString(16).padStart(2,"0")).join("");
+    sessionStorage.setItem("btk_pi_oauth_state",state);
+    piStatus.textContent="Opening Pi authorization…";
+    window.Pi.signIn({
+      clientId:PI_CLIENT_ID,
+      redirectUri:PI_REDIRECT_URI,
+      scopes:["username"],
+      state
     });
-    const data=await response.json();
-    if(!response.ok||!data.verified||!data.user||!data.user.uid){
-      throw new Error(data.error||"Pi identity verification failed.");
-    }
-    sessionStorage.setItem("btk_pi_user",JSON.stringify({
-      uid:data.user.uid,
-      username:data.user.username||""
-    }));
-    piStatus.textContent="Pi identity verified"+(data.user.username?" for @"+data.user.username:"")+".";
-    piButton.textContent="Pi identity verified";
   }catch(error){
-    piStatus.textContent=error&&error.message?error.message:"Pi Sign-In was not completed. Please try again.";
-    piButton.disabled=false;
+    sessionStorage.removeItem("btk_pi_oauth_state");
+    piStatus.textContent=error&&error.message?error.message:"Pi Sign-In could not start. Please refresh and try again.";
   }
 });
 try{
@@ -98,6 +84,7 @@ try{
   if(saved&&saved.uid){
     piStatus.textContent="Pi identity verified"+(saved.username?" for @"+saved.username:"")+".";
     piButton.textContent="Pi identity verified";
+    piButton.disabled=true;
   }
 }catch(_){}
 </script>
