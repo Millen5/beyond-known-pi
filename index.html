@@ -34,7 +34,7 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 <a class="card" href="https://beyondknownstories.blogspot.com/"><div class="symbol">📚</div><h3>All Articles</h3><p>Browse the latest writing and discoveries from BEYOND THE KNOWN.</p></a>
 </div></div></section>
 <section id="about"><div class="wrap"><div class="mission"><div class="eyebrow">Our mission</div><h2>Make complex knowledge accessible.</h2><p>BEYOND THE KNOWN is an independent digital knowledge platform created to inspire thoughtful exploration, evidence-based learning and informed conversations about science, technology, finance and our world.</p><a class="btn gold" href="https://beyondknownstories.blogspot.com/">Start Reading ↗</a></div></div></section>
-<section id="pi"><div class="wrap"><div class="eyebrow">Building for the future</div><h2>Our Pi Ecosystem journey</h2><p class="muted">This is the BEYOND THE KNOWN Testnet preview environment for learning and discovery. It is separate from the Mainnet experience and is provided for testing only. Pi authentication, membership services and Pi payments will be introduced only after the required developer integration, server-side verification and testing are complete.</p><div class="pi-note"><strong>Security notice:</strong> BEYOND THE KNOWN will never ask you to enter or share your Pi Wallet passphrase. This website does not currently process Pi payments.</div></div></section>
+<section id="pi"><div class="wrap"><div class="eyebrow">Building for the future</div><h2>Our Pi Ecosystem journey</h2><p class="muted">This is the BEYOND THE KNOWN Testnet preview environment for learning and discovery. It is separate from the Mainnet experience. Pi Sign-In is being tested for identity verification only; membership services, payments and wallet transactions are not enabled.</p><div class="pi-note"><strong>Security notice:</strong> BEYOND THE KNOWN will never ask you to enter or share your Pi Wallet passphrase. This website does not currently process Pi payments.</div></div></section>
 </main>
 <footer><div class="wrap foot"><span>© <span id="year">2026</span> BEYOND THE KNOWN</span><span>Educational content only · Not financial advice</span><span><a href="privacy.html">Privacy Policy</a></span></div></footer>
 <script>
@@ -61,12 +61,16 @@ piButton.addEventListener("click",async()=>{
     return;
   }
   piButton.disabled=true;
-  piStatus.textContent="Waiting for Pi authentication…";
+  piStatus.textContent="Waiting for Pi approval…";
   try{
-    const auth=await window.Pi.authenticate(["username"],()=>{});
+    const auth=await Promise.race([
+      window.Pi.authenticate(["username"],()=>{}),
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error("Pi approval did not return a response within 60 seconds. Close this message, refresh Pi Browser and try once more.")),60000))
+    ]);
     if(!auth||!auth.accessToken){
-      throw new Error("Pi did not return an access token.");
+      throw new Error("Pi did not return an access token. Please try signing in again.");
     }
+    piStatus.textContent="Pi approval received. Verifying your identity securely…";
     const response=await fetch("/api/pi/verify",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
