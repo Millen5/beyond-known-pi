@@ -42,25 +42,28 @@ document.getElementById("year").textContent=new Date().getFullYear();
 const piStatus=document.getElementById("pi-auth-status");
 const piButton=document.getElementById("pi-signin");
 let piReady=false;
-if(window.Pi){
-  try{
-    Pi.init({version:"2.0",sandbox:true});
-    piReady=true;
-  }catch(error){
-    piStatus.textContent="Pi SDK could not initialize. Please reopen this app in Pi Browser.";
+(async()=>{
+  if(!window.Pi){
+    piStatus.textContent="Pi SDK is unavailable. Please refresh this page inside Pi Browser.";
+    return;
   }
-}else{
-  piStatus.textContent="Open BEYOND THE KNOWN inside Pi Browser to use Pi Sign-In.";
-}
+  try{
+    await window.Pi.init({version:"2.0",sandbox:true});
+    piReady=true;
+    piStatus.textContent="Pi Testnet is ready. Sign in securely with Pi.";
+  }catch(error){
+    piStatus.textContent="Pi SDK could not initialize. Please refresh and try again.";
+  }
+})();
 piButton.addEventListener("click",async()=>{
   if(!piReady||!window.Pi){
-    piStatus.textContent="Pi Sign-In is available inside Pi Browser. Please open this app there.";
+    piStatus.textContent="Pi is still initializing. Please wait a moment and try again.";
     return;
   }
   piButton.disabled=true;
   piStatus.textContent="Waiting for Pi authentication…";
   try{
-    const auth=await Pi.authenticate(["username"],()=>{});
+    const auth=await window.Pi.authenticate(["username"],()=>{});
     if(!auth||!auth.accessToken){
       throw new Error("Pi did not return an access token.");
     }
@@ -68,6 +71,7 @@ piButton.addEventListener("click",async()=>{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       credentials:"same-origin",
+      cache:"no-store",
       body:JSON.stringify({accessToken:auth.accessToken})
     });
     const data=await response.json();
@@ -78,8 +82,8 @@ piButton.addEventListener("click",async()=>{
       uid:data.user.uid,
       username:data.user.username||""
     }));
-    piStatus.textContent="Signed in successfully"+(data.user.username?" as @"+data.user.username:"")+". Your Pi identity has been verified.";
-    piButton.textContent="Signed in with Pi";
+    piStatus.textContent="Pi identity verified"+(data.user.username?" for @"+data.user.username:"")+".";
+    piButton.textContent="Pi identity verified";
   }catch(error){
     piStatus.textContent=error&&error.message?error.message:"Pi Sign-In was not completed. Please try again.";
     piButton.disabled=false;
@@ -88,8 +92,8 @@ piButton.addEventListener("click",async()=>{
 try{
   const saved=JSON.parse(sessionStorage.getItem("btk_pi_user")||"null");
   if(saved&&saved.uid){
-    piStatus.textContent="Signed in"+(saved.username?" as @"+saved.username:"")+".";
-    piButton.textContent="Signed in with Pi";
+    piStatus.textContent="Pi identity verified"+(saved.username?" for @"+saved.username:"")+".";
+    piButton.textContent="Pi identity verified";
   }
 }catch(_){}
 </script>
