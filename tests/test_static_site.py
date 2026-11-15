@@ -24,26 +24,25 @@ class StaticSiteTests(unittest.TestCase):
             with self.subTest(name=name):
                 self.assertTrue((ROOT / name).is_file())
 
-    def test_homepage_uses_official_pi_sdk(self):
+    def test_homepage_uses_documented_pi_oauth_signin(self):
         html = (ROOT / "index.html").read_text(encoding="utf-8")
         self.assertIn("Testnet Preview", html)
         self.assertIn('href="privacy.html"', html)
         self.assertIn('href="terms.html"', html)
         self.assertIn("does not currently process Pi payments", html)
         self.assertIn("Pi Wallet passphrase", html)
-        self.assertIn("Sign in with Pi", html)
-        self.assertIn("https://sdk.minepi.com/pi-sdk.js", html)
-        self.assertIn('await window.Pi.init({version:"2.0"})', html)
-        self.assertIn("window.Pi.signIn({", html)
-        self.assertIn("clientId:PI_CLIENT_ID", html)
+        self.assertIn('id="pi-signin"', html)
+        self.assertIn("https://accounts.pinet.com/oauth/authorize", html)
+        self.assertIn('searchParams.set("response_type","token")', html)
+        self.assertIn('searchParams.set("client_id",PI_CLIENT_ID)', html)
+        self.assertIn('searchParams.set("redirect_uri",PI_REDIRECT_URI)', html)
+        self.assertIn('searchParams.set("scope","username")', html)
+        self.assertIn('searchParams.set("state",state)', html)
+        self.assertIn("window.location.assign(authorize.toString())", html)
         self.assertIn("btk_pi_oauth_state", html)
         self.assertIn("https://beyond-known-pi.pages.dev/signin/callback.html", html)
-        self.assertIn("Opening Pi authorization", html)
         self.assertNotIn("window.Pi.authenticate(", html)
-        self.assertNotIn("Pi authentication, membership services and Pi payments will be introduced only", html)
-        self.assertNotIn("accounts.pinet.com/oauth/authorize", html)
-        self.assertNotIn("response_type", html)
-
+        self.assertNotIn("window.Pi.signIn(", html)
     def test_callback_validates_state_and_calls_backend(self):
         html = (ROOT / "signin/callback.html").read_text(encoding="utf-8")
         self.assertIn('sessionStorage.getItem("btk_pi_oauth_state")', html)
