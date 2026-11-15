@@ -1,26 +1,30 @@
 # Testnet release checklist
 
-## Completed in this repository branch
-
-- [x] Dedicated `testnet-hosting` branch created from `main`.
+## Completed
+- [x] Dedicated `testnet-hosting` branch kept separate from `main`.
+- [x] Cloudflare Pages Testnet project deployed at https://beyond-known-pi.pages.dev/.
+- [x] Cloudflare production deployment confirmed for the current Testnet commit.
 - [x] Homepage clearly identifies itself as a Testnet preview.
-- [x] Mainnet publishing source is not changed.
 - [x] Existing Pi domain-validation file is preserved.
-- [x] Incomplete browser-only OAuth callback disabled.
-- [x] Static-site test suite and GitHub Actions workflow added.
+- [x] Incomplete legacy OAuth callback remains disabled.
+- [x] Official Pi SDK initialization and `Pi.authenticate(["username"])` flow are present.
+- [x] Cloudflare Pages Function sends the access token to Pi `/v2/me` for server-side identity verification.
+- [x] Sign-in UI now has clearer progress messages and a 60-second timeout for a non-returning SDK promise.
+- [x] Static-site tests and GitHub Actions checks are configured.
 
-## Still required before user testing
+## Still required before declaring Pi Sign-In ready
+- [ ] Confirm the Testnet app's Developer Portal URL/domain verification matches `https://beyond-known-pi.pages.dev`.
+- [ ] Confirm the deployed Testnet app is configured for this exact host and Testnet environment.
+- [ ] Run a fresh end-to-end approval in Pi Browser and confirm the SDK returns an access token.
+- [ ] Confirm the Cloudflare Function successfully verifies the token with Pi `/v2/me`.
+- [ ] Confirm the UI displays the verified Pi username and handles cancellation, timeout, invalid tokens and network failures.
+- [ ] Review privacy/session handling before using Pi identity for accounts or membership.
 
-- [ ] Create and deploy a separate free hosting project for the Testnet branch.
-- [ ] Confirm the exact public URL loads over HTTPS.
-- [ ] Confirm Pi Developer Portal accepts the Testnet app's domain verification for that URL.
-- [ ] Set the Testnet app's production URL and allowed OAuth redirect URI to the exact deployed URL.
-- [ ] Implement official Pi authentication using a secure backend; validate tokens server-side.
-- [ ] Implement payment creation and server-side completion verification only if payments are required.
-- [ ] Add no secrets to the repository or browser code.
-- [ ] Run the Testnet flow with test accounts and verify failure paths, replay protection, and duplicate-payment handling.
-- [ ] Obtain the required Testnet A2U transactions to distinct wallets if applying for Mainnet outgoing-wallet capability.
+## Payments and Mainnet
+- [ ] Implement payment creation and server-side approval/completion only if the app will accept payments.
+- [ ] Add replay protection, idempotency and duplicate-payment handling before any payment testing.
+- [ ] Obtain the required successful Testnet App-to-User transactions to distinct wallets if applying for Mainnet outgoing-wallet capability.
+- [ ] Keep Mainnet credentials and configuration separate; do not enable Mainnet payments until approved and tested.
 
 ## Important
-
-The remaining tasks require access to the Pi Developer Portal, a working separate hosting deployment, and secure backend configuration. This repository branch alone cannot complete those external account and server-side steps. Do not describe the app as Pi-integrated or ready for payments until all checks above have passed.
+The public Testnet site is deployed, but a successful production deployment does not prove Pi authentication works. Do not describe Pi Sign-In as complete, enable payments, or request wallet passphrases. The app must verify identity server-side before treating a Pioneer as signed in.
