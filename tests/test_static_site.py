@@ -54,9 +54,19 @@ class StaticSiteTests(unittest.TestCase):
     def test_backend_verifies_token_with_pi_and_does_not_expose_secrets(self):
         js = (ROOT / "functions/api/pi/verify.js").read_text(encoding="utf-8")
         self.assertIn("https://api.minepi.com/v2/me", js)
+        self.assertIn("HttpOnly; Secure; SameSite=Lax", js)
         self.assertIn("Authorization", js)
         self.assertIn("Origin", js)
         self.assertNotIn("Server API Key", js)
+
+    def test_login_logout_session_endpoints_exist(self):
+        for name in ("functions/api/pi/session.js", "functions/api/pi/logout.js"):
+            with self.subTest(name=name):
+                self.assertTrue((ROOT / name).is_file())
+        html = (ROOT / "index.html").read_text(encoding="utf-8")
+        self.assertIn('fetch("/api/pi/session"', html)
+        self.assertIn('fetch("/api/pi/logout"', html)
+        self.assertIn('piButton.textContent="Log out"', html)
 
     def test_no_obvious_secret_material(self):
         for path in ROOT.rglob("*"):
