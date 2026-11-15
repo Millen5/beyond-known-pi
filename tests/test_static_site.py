@@ -34,6 +34,9 @@ class StaticSiteTests(unittest.TestCase):
         self.assertIn('await window.Pi.init({version:"2.0",sandbox:true})', html)
         self.assertIn('window.Pi.authenticate(["username"]', html)
         self.assertIn("/api/pi/verify", html)
+        self.assertIn("Pi approval did not return a response within 60 seconds", html)
+        self.assertIn("Pi approval received. Verifying your identity securely", html)
+        self.assertNotIn("Pi authentication, membership services and Pi payments will be introduced only", html)
         self.assertNotIn("accounts.pinet.com/oauth/authorize", html)
         self.assertNotIn("response_type", html)
 
