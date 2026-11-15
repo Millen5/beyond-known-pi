@@ -18,10 +18,11 @@ The Cloudflare Pages project deploys this Testnet branch. The existing GitHub Pa
 - Responsive static website for desktop and mobile.
 - Topic links to the BEYOND THE KNOWN Blogger publication.
 - Explicit Testnet Preview banner to distinguish this branch from Mainnet.
-- Pi Sign-In uses the official Pi Sign-In OAuth helper (`Pi.signIn`) with the registered Testnet client ID and callback URL.
-- The callback validates the returned OAuth `state`, reads the short-lived access token from the URL fragment, removes the fragment from browser history, and sends the token to the Cloudflare Pages Function at `/api/pi/verify`.
-- The Pages Function checks the token against Pi Platform API `GET https://api.minepi.com/v2/me` and returns only the verified app-specific UID and username.
-- The browser displays the verified username for the current tab session. This is a Testnet identity preview, not yet a full account/session system; do not use browser session storage alone to protect private content or authorize payments.
+- Pi App sign-in in the Testnet Pi Browser uses the official Pi SDK: `Pi.init({ version: "2.0", sandbox: true })` followed by `Pi.authenticate(["username"], ...)`.
+- The frontend sends the returned access token to the Cloudflare Pages Function at `/api/pi/verify`.
+- The Pages Function checks the token against Pi Platform API `GET https://api.minepi.com/v2/me`, then issues a Secure, HttpOnly session cookie after successful verification.
+- The `/api/pi/session` endpoint revalidates the session token with Pi before restoring the signed-in UI; `/api/pi/logout` clears the cookie.
+- This remains a Testnet identity preview, not a full user-account or membership system. Do not use it to authorize paid access until the account and entitlement model has been reviewed and tested.
 - Payments, wallet transactions, memberships and user data storage are not enabled.
 - No wallet passphrase, private key, or Server API Key is requested or stored in the browser code.
 
@@ -29,7 +30,6 @@ The Cloudflare Pages project deploys this Testnet branch. The existing GitHub Pa
 
 - `index.html` — Testnet preview homepage and Pi Sign-In entry point.
 - `privacy.html` — privacy information for the current static version.
-- `signin/callback.html` — OAuth callback, state validation and server-side identity verification request.
 - `functions/api/pi/verify.js` — Cloudflare Pages Function that verifies the access token with Pi.
 - `validation-key.txt` — Pi Developer Portal domain-validation file. Preserve it; do not publish its contents in documentation or remove it without a specific reason.
 - `404.html` — custom not-found page.
@@ -40,9 +40,9 @@ The Cloudflare Pages project deploys this Testnet branch. The existing GitHub Pa
 
 ## Pi integration and safety
 
-The official Pi Sign-In OAuth flow currently uses the implicit flow. The browser must validate the returned `state` before accepting the response. The access token is then verified server-side through Pi's `/v2/me` endpoint. A successful approval screen alone is not proof that the backend verification succeeded; the final success message is shown only after the verification endpoint responds successfully.
+The Testnet Pi App uses the Pi SDK authentication flow documented for apps running inside Pi Browser. The access token returned by `Pi.authenticate()` is verified server-side through Pi's `/v2/me` endpoint. A successful Pi approval screen alone is not proof that backend verification succeeded; the site displays the signed-in state only after the verification endpoint responds successfully.
 
-This implementation has been exercised in Pi Browser, where the user approved the requested identity and username permissions and the site displayed a verified username. A fresh repeat test and negative-path tests (cancelled approval, invalid token, network failure and state mismatch) remain part of release validation.
+The previous website OAuth redirect flow is not used for the in-app Testnet login because the OAuth Sign-In guide is intended for ordinary browsers with authentication taking place in Pi Browser. A fresh repeat test and negative-path tests (cancelled approval, invalid token and network failure) remain part of release validation.
 
 The current verification endpoint does not create a server-side login session or persistent account. Do not add protected membership, paid access, or other authorization based solely on client-side session storage.
 
