@@ -21,7 +21,7 @@ The Cloudflare Pages project is connected only to this repository. The existing 
 - Pi Testnet Sign-In uses the official Pi SDK and a Cloudflare Pages Function to verify access tokens with the Pi Platform API. This is an identity-verification preview only; payments, wallet transactions, and memberships are not active.
 - The legacy OAuth callback route remains disabled; the homepage uses the official Pi SDK flow instead.
 - No wallet passphrase, private key, or server secret is requested or stored by this static site.
-- The public Testnet preview was checked after deployment; homepage, Privacy Policy, custom 404 page, and inspected blog links loaded successfully.
+- The public Testnet preview was checked after deployment. The homepage and Pi SDK readiness status loaded; Pi approval still needs a fresh end-to-end test in Pi Browser.
 
 ## Files
 
@@ -37,7 +37,7 @@ The Cloudflare Pages project is connected only to this repository. The existing 
 
 ## Pi integration and safety
 
-Pi Sign-In is implemented as a Testnet identity-verification preview using the official SDK and a server-side `/api/pi/verify` function. End-to-end testing inside Pi Browser is still required. Payments and wallet transactions are not implemented. The Pi Server API Key must remain server-side and must never be committed or placed in browser JavaScript. Never request or collect a visitor's Pi Wallet passphrase.
+Pi Sign-In is wired as a Testnet identity-verification preview using the official SDK and a server-side `/api/pi/verify` function. The UI reports when approval is pending, when a token is being verified, and if the SDK does not return within 60 seconds. End-to-end testing inside Pi Browser is still required. Payments and wallet transactions are not implemented. The Pi Server API Key must remain server-side and must never be committed or placed in browser JavaScript. Never request or collect a visitor's Pi Wallet passphrase.
 
 The frontend SDK alone is not sufficient: the backend must verify authentication with the Pi Platform API and handle payment approval and completion securely. See the official [Pi developer documentation](https://developers.minepi.com/docs/build-first-app/GettingStarted).
 
