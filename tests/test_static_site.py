@@ -24,22 +24,18 @@ class StaticSiteTests(unittest.TestCase):
             with self.subTest(name=name):
                 self.assertTrue((ROOT / name).is_file())
 
-    def test_homepage_has_testnet_disclaimer_and_pi_signin(self):
+    def test_homepage_uses_official_pi_sdk(self):
         html = (ROOT / "index.html").read_text(encoding="utf-8")
         self.assertIn("Testnet Preview", html)
         self.assertIn("does not currently process Pi payments", html)
         self.assertIn("Pi Wallet passphrase", html)
         self.assertIn("Sign in with Pi", html)
-        self.assertIn("btk_pi_oauth_state", html)
-        self.assertIn("response_type", html)
-
-    def test_callback_checks_state_and_verifies_token(self):
-        html = (ROOT / "signin/callback.html").read_text(encoding="utf-8")
-        self.assertIn("btk_pi_oauth_state", html)
-        self.assertIn("params.get(\"state\")", html)
+        self.assertIn("https://sdk.minepi.com/pi-sdk.js", html)
+        self.assertIn('Pi.init({version:"2.0",sandbox:true})', html)
+        self.assertIn('Pi.authenticate(["username"]', html)
         self.assertIn("/api/pi/verify", html)
-        self.assertIn("history.replaceState", html)
-        self.assertNotIn("localStorage", html)
+        self.assertNotIn("accounts.pinet.com/oauth/authorize", html)
+        self.assertNotIn("response_type", html)
 
     def test_backend_verifies_token_with_pi_and_does_not_expose_secrets(self):
         js = (ROOT / "functions/api/pi/verify.js").read_text(encoding="utf-8")
