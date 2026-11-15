@@ -36,12 +36,19 @@ class StaticSiteTests(unittest.TestCase):
         self.assertIn("clientId:PI_CLIENT_ID", html)
         self.assertIn("btk_pi_oauth_state", html)
         self.assertIn("https://beyond-known-pi.pages.dev/signin/callback.html", html)
-        self.assertIn("/api/pi/verify", html)
         self.assertIn("Opening Pi authorization", html)
         self.assertNotIn("window.Pi.authenticate(", html)
         self.assertNotIn("Pi authentication, membership services and Pi payments will be introduced only", html)
         self.assertNotIn("accounts.pinet.com/oauth/authorize", html)
         self.assertNotIn("response_type", html)
+
+    def test_callback_validates_state_and_calls_backend(self):
+        html = (ROOT / "signin/callback.html").read_text(encoding="utf-8")
+        self.assertIn('sessionStorage.getItem("btk_pi_oauth_state")', html)
+        self.assertIn('returnedState!==expected', html)
+        self.assertIn('fetch("/api/pi/verify"', html)
+        self.assertIn('accessToken:token', html)
+        self.assertIn('history.replaceState(null,"",location.pathname)', html)
 
     def test_backend_verifies_token_with_pi_and_does_not_expose_secrets(self):
         js = (ROOT / "functions/api/pi/verify.js").read_text(encoding="utf-8")
