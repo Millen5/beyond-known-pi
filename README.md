@@ -18,8 +18,8 @@ The Cloudflare Pages project is connected only to this repository. The existing 
 - Responsive static website for desktop and mobile.
 - Topic links to the BEYOND THE KNOWN Blogger publication.
 - Explicit Testnet Preview banner to distinguish this branch from Mainnet.
-- Pi authentication, payments, wallet transactions, and memberships are not active.
-- The Pi Sign-In callback page is a disabled information page; it does not read OAuth tokens or call Pi APIs.
+- Pi Testnet Sign-In uses the official Pi SDK and a Cloudflare Pages Function to verify access tokens with the Pi Platform API. This is an identity-verification preview only; payments, wallet transactions, and memberships are not active.
+- The legacy OAuth callback route remains disabled; the homepage uses the official Pi SDK flow instead.
 - No wallet passphrase, private key, or server secret is requested or stored by this static site.
 - The public Testnet preview was checked after deployment; homepage, Privacy Policy, custom 404 page, and inspected blog links loaded successfully.
 
@@ -37,7 +37,7 @@ The Cloudflare Pages project is connected only to this repository. The existing 
 
 ## Pi integration and safety
 
-Pi authentication and payments are not implemented in this static preview. A secure server-side integration, correct Testnet app configuration, registered redirect URI, and end-to-end tests are required before enabling them. The Pi Server API Key must remain server-side and must never be committed or placed in browser JavaScript. Never request or collect a visitor's Pi Wallet passphrase.
+Pi Sign-In is implemented as a Testnet identity-verification preview using the official SDK and a server-side `/api/pi/verify` function. End-to-end testing inside Pi Browser is still required. Payments and wallet transactions are not implemented. The Pi Server API Key must remain server-side and must never be committed or placed in browser JavaScript. Never request or collect a visitor's Pi Wallet passphrase.
 
 The frontend SDK alone is not sufficient: the backend must verify authentication with the Pi Platform API and handle payment approval and completion securely. See the official [Pi developer documentation](https://developers.minepi.com/docs/build-first-app/GettingStarted).
 
