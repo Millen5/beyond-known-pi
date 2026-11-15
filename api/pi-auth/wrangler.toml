@@ -1,0 +1,6 @@
+name = "beyond-known-pi-auth"
+main = "src/index.js"
+compatibility_date = "2026-11-15"
+
+[vars]
+APP_ORIGIN = "https://millen5.github.io"
