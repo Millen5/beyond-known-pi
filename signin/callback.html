@@ -55,10 +55,9 @@ a{color:var(--gold)}.eyebrow{color:var(--gold);font-size:.75rem;letter-spacing:.
    if(!response.ok||!data.verified||!data.user||!data.user.uid){
      throw new Error(data.error||"Pi could not verify this account.");
    }
-   sessionStorage.setItem("btk_pi_user",JSON.stringify({uid:data.user.uid,username:data.user.username||""}));
    heading.textContent="Pi identity verified";
-   status.textContent="Welcome"+(data.user.username?", "+data.user.username:"")+". Your Pi identity was verified.";
-   detail.textContent="This is a Testnet preview. No payments or wallet transactions are enabled.";
+   status.textContent="Welcome"+(data.user.username?", "+data.user.username:"")+". Your secure sign-in session is active.";
+   detail.textContent="Return to the homepage. Your session is held in a Secure, HttpOnly cookie and can be ended with Log out."
  }catch(e){
    heading.textContent="Verification unsuccessful";
    status.textContent=e.message||"The verification service could not confirm your Pi account.";
