@@ -26,7 +26,15 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 #article-library #featured-grid .featured-card h3{display:block;width:100%;max-width:100%;font-size:clamp(1rem,4vw,1.2rem);line-height:1.45;letter-spacing:-.02em;overflow-wrap:anywhere;word-break:normal;white-space:normal}
 #article-library #featured-grid .featured-card p{width:100%;font-size:.95rem;line-height:1.65;overflow-wrap:anywhere;white-space:normal}
 #article-library #featured-grid .featured-card .article-meta{margin-top:8px}
-.topic-picker{margin:42px 0 30px;padding-top:28px;border-top:1px solid var(--line)}.topic-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px}.topic-tile{display:flex;align-items:center;gap:12px;min-width:0;min-height:64px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--text);font:600 .9rem Manrope,sans-serif;text-align:left;cursor:pointer}.topic-tile span{overflow-wrap:anywhere}.topic-tile:active,.topic-tile:focus-visible{border-color:var(--gold);outline:2px solid #ffc56a55}@media(max-width:420px){.topic-grid{grid-template-columns:1fr}.topic-tile{min-height:56px}}</style>
+.topic-picker{margin:42px 0 30px;padding-top:28px;border-top:1px solid var(--line)}.topic-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px}.topic-tile{display:flex;align-items:center;gap:12px;min-width:0;min-height:64px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--text);font:600 .9rem Manrope,sans-serif;text-align:left;cursor:pointer}.topic-tile span{overflow-wrap:anywhere}.topic-tile:active,.topic-tile:focus-visible{border-color:var(--gold);outline:2px solid #ffc56a55}@media(max-width:420px){.topic-grid{grid-template-columns:1fr}.topic-tile{min-height:56px}}/* Compact article choices; featured latest posts remain unchanged */
+#article-library #article-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:22px;align-items:stretch}
+#article-library #article-grid .article-card{display:flex;flex-direction:column;align-items:flex-start;min-width:0;min-height:0;height:100%;padding:16px;border-radius:14px;overflow:hidden;box-sizing:border-box}
+#article-library #article-grid .article-card h3{font:650 .96rem/1.4 Manrope,sans-serif;letter-spacing:-.02em;margin:0 0 6px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+#article-library #article-grid .article-card .article-meta{font-size:.72rem;margin:4px 0 8px}
+#article-library #article-grid .article-card p{font-size:.82rem;line-height:1.45;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+#article-library #article-grid .article-card .read-label{font-size:.82rem;margin-top:12px}
+@media(max-width:520px){#article-library #article-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}#article-library #article-grid .article-card{padding:13px}#article-library #article-grid .article-card h3{font-size:.85rem;line-height:1.35}#article-library #article-grid .article-card p{font-size:.75rem;line-height:1.4}}
+</style>
 <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 </head>
 <body>
