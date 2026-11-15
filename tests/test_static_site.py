@@ -24,7 +24,7 @@ class StaticSiteTests(unittest.TestCase):
             with self.subTest(name=name):
                 self.assertTrue((ROOT / name).is_file())
 
-    def test_homepage_uses_documented_pi_oauth_signin(self):
+    def test_homepage_uses_pi_sdk_authentication_in_testnet(self):
         html = (ROOT / "index.html").read_text(encoding="utf-8")
         self.assertIn("Testnet Preview", html)
         self.assertIn('href="privacy.html"', html)
@@ -32,16 +32,11 @@ class StaticSiteTests(unittest.TestCase):
         self.assertIn("does not currently process Pi payments", html)
         self.assertIn("Pi Wallet passphrase", html)
         self.assertIn('id="pi-signin"', html)
-        self.assertIn("https://accounts.pinet.com/oauth/authorize", html)
-        self.assertIn('searchParams.set("response_type","token")', html)
-        self.assertIn('searchParams.set("client_id",PI_CLIENT_ID)', html)
-        self.assertIn('searchParams.set("redirect_uri",PI_REDIRECT_URI)', html)
-        self.assertIn('searchParams.set("scope","username")', html)
-        self.assertIn('searchParams.set("state",state)', html)
-        self.assertIn("window.location.assign(authorize.toString())", html)
-        self.assertIn("btk_pi_oauth_state", html)
-        self.assertIn("https://beyond-known-pi.pages.dev/signin/callback.html", html)
-        self.assertNotIn("window.Pi.authenticate(", html)
+        self.assertIn('window.Pi.init({version:"2.0",sandbox:true})', html)
+        self.assertIn('window.Pi.authenticate(["username"]', html)
+        self.assertIn('fetch("/api/pi/verify"', html)
+        self.assertIn('accessToken:auth.accessToken', html)
+        self.assertNotIn("accounts.pinet.com/oauth/authorize", html)
         self.assertNotIn("window.Pi.signIn(", html)
     def test_callback_validates_state_and_calls_backend(self):
         html = (ROOT / "signin/callback.html").read_text(encoding="utf-8")
