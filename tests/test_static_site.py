@@ -18,29 +18,39 @@ class LinkParser(HTMLParser):
                 self.links.append(value)
 
 class StaticSiteTests(unittest.TestCase):
-    def test_required_pages_exist(self):
-        for name in ("index.html", "privacy.html", "404.html", "robots.txt"):
+    def test_required_pages_and_api_exist(self):
+        for name in ("index.html", "privacy.html", "404.html", "robots.txt",
+                     "signin/callback.html", "functions/api/pi/verify.js"):
             with self.subTest(name=name):
                 self.assertTrue((ROOT / name).is_file())
 
-    def test_homepage_has_testnet_disclaimer(self):
+    def test_homepage_has_testnet_disclaimer_and_pi_signin(self):
         html = (ROOT / "index.html").read_text(encoding="utf-8")
         self.assertIn("Testnet Preview", html)
         self.assertIn("does not currently process Pi payments", html)
         self.assertIn("Pi Wallet passphrase", html)
+        self.assertIn("Sign in with Pi", html)
+        self.assertIn("btk_pi_oauth_state", html)
+        self.assertIn("response_type", html)
 
-    def test_callback_does_not_handle_tokens_or_make_api_calls(self):
+    def test_callback_checks_state_and_verifies_token(self):
         html = (ROOT / "signin/callback.html").read_text(encoding="utf-8")
-        self.assertIn("Pi Sign-In is not available yet", html)
-        self.assertNotIn("access_token", html)
-        self.assertNotIn("api.minepi.com", html)
-        self.assertNotIn("Authorization: Bearer", html)
+        self.assertIn("btk_pi_oauth_state", html)
+        self.assertIn("params.get(\"state\")", html)
+        self.assertIn("/api/pi/verify", html)
+        self.assertIn("history.replaceState", html)
+        self.assertNotIn("localStorage", html)
+
+    def test_backend_verifies_token_with_pi_and_does_not_expose_secrets(self):
+        js = (ROOT / "functions/api/pi/verify.js").read_text(encoding="utf-8")
+        self.assertIn("https://api.minepi.com/v2/me", js)
+        self.assertIn("Authorization", js)
+        self.assertIn("Origin", js)
+        self.assertNotIn("Server API Key", js)
 
     def test_no_obvious_secret_material(self):
         for path in ROOT.rglob("*"):
-            if not path.is_file() or ".git" in path.parts:
-                continue
-            if path.name == "validation-key.txt":
+            if not path.is_file() or ".git" in path.parts or path.name == "validation-key.txt":
                 continue
             if path.suffix.lower() not in {".html", ".js", ".json", ".yml", ".yaml", ".md", ".py"}:
                 continue
