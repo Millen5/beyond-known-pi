@@ -19,6 +19,7 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 @media(max-width:760px){.nav{align-items:flex-start;flex-direction:column;padding:15px 0;gap:11px}.links{gap:13px}.hero{padding:76px 0 82px}section{padding:56px 0}.grid{grid-template-columns:1fr}.card{min-height:0}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
 </style>
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
 </head>
 <body>
 <header><div class="wrap nav"><a class="brand" href="#home">✦ BEYOND <span>THE KNOWN</span></a><nav class="links" aria-label="Main navigation"><a href="#discover">Discover</a><a href="#about">About</a><a href="#pi">Pi Journey</a><a href="https://beyondknownstories.blogspot.com/" target="_blank" rel="noopener noreferrer">Blog ↗</a></nav></div></header>
@@ -33,8 +34,55 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 <a class="card" href="https://beyondknownstories.blogspot.com/"><div class="symbol">📚</div><h3>All Articles</h3><p>Browse the latest writing and discoveries from BEYOND THE KNOWN.</p></a>
 </div></div></section>
 <section id="about"><div class="wrap"><div class="mission"><div class="eyebrow">Our mission</div><h2>Make complex knowledge accessible.</h2><p>BEYOND THE KNOWN is an independent digital knowledge platform created to inspire thoughtful exploration, evidence-based learning and informed conversations about science, technology, finance and our world.</p><a class="btn gold" href="https://beyondknownstories.blogspot.com/">Start Reading ↗</a></div></div></section>
-<section id="pi"><div class="wrap"><div class="eyebrow">Building for the future</div><h2>Our Pi Ecosystem journey</h2><p class="muted">We are preparing a Pi Browser experience for learning and discovery. Pi authentication, membership services and Pi payments will be introduced only after the required developer integration, server-side verification and testing are complete.</p><div class="pi-note"><strong>Security notice:</strong> BEYOND THE KNOWN will never ask you to enter or share your Pi Wallet passphrase. This website does not currently process Pi payments.</div></div></section>
+<section id="pi"><div class="wrap"><div class="eyebrow">Building for the future</div><h2>Our Pi Ecosystem journey</h2><p class="muted">BEYOND THE KNOWN is preparing native Pi Browser features for the Pi community. Pi payments and paid memberships are not currently enabled.</p><div class="pi-note"><strong>Security notice:</strong> BEYOND THE KNOWN will never ask you to enter or share your Pi Wallet passphrase.</div><div class="pi-note" style="margin-top:18px"><strong>Support independent knowledge:</strong><p id="pi-ad-status" aria-live="polite">Checking Pi Browser advertising support…</p><button class="btn gold" id="pi-interstitial-ad" type="button" disabled>View an ad</button></div></div></section>
 </main>
 <footer><div class="wrap foot"><span>© <span id="year">2026</span> BEYOND THE KNOWN</span><span>Educational content only · Not financial advice</span><span><a href="privacy.html">Privacy Policy</a></span></div></footer>
-<script>document.getElementById("year").textContent=new Date().getFullYear()</script>
+<script>
+document.getElementById("year").textContent=new Date().getFullYear();
+(async function(){
+  const status = document.getElementById("pi-ad-status");
+  const button = document.getElementById("pi-interstitial-ad");
+  const setStatus = (message) => { status.textContent = message; };
+  if (!window.Pi) {
+    setStatus("Open this app in Pi Browser to check ad availability.");
+    return;
+  }
+  try {
+    await Pi.init({ version: "2.0", sandbox: false });
+    const features = await Pi.nativeFeaturesList();
+    if (!features.includes("ad_network")) {
+      setStatus("Ads are not supported by this Pi Browser version. Please update Pi Browser.");
+      return;
+    }
+    if (!Pi.Ads || typeof Pi.Ads.showAd !== "function") {
+      setStatus("Pi Ads are not available in this app environment yet.");
+      return;
+    }
+    setStatus("Pi Browser supports ads. Availability depends on Pi Ad Network approval and ad inventory.");
+    button.disabled = false;
+  } catch (error) {
+    setStatus("Pi Ads could not be initialized. Please try again in Pi Browser.");
+  }
+  button.addEventListener("click", async function(){
+    button.disabled = true;
+    setStatus("Requesting an advertisement…");
+    try {
+      const result = await Pi.Ads.showAd("interstitial");
+      if (result.result === "AD_CLOSED") {
+        setStatus("Thank you for supporting BEYOND THE KNOWN.");
+      } else if (result.result === "AD_NOT_AVAILABLE") {
+        setStatus("No advertisement is available right now. Please try again later.");
+      } else if (result.result === "ADS_NOT_SUPPORTED") {
+        setStatus("Ads are not supported by this Pi Browser version. Please update Pi Browser.");
+      } else {
+        setStatus("The advertisement could not be displayed. Please try again later.");
+      }
+    } catch (error) {
+      setStatus("The advertisement could not be displayed. Please try again later.");
+    } finally {
+      button.disabled = false;
+    }
+  });
+})();
+</script>
 </body></html>
