@@ -50,16 +50,32 @@ function showSignedIn(username){
   piButton.textContent="Log out"; piButton.disabled=false; piButton.onclick=logoutPi;
   piStatus.textContent="Pi identity verified"+(username?" for @"+username:"")+".";
 }
-function startPiSignIn(){
+async function startPiSignIn(){
+  piButton.disabled=true;
+  piStatus.textContent="Connecting securely to Pi…";
   try{
-    const state=Array.from(crypto.getRandomValues(new Uint8Array(24)),b=>b.toString(16).padStart(2,"0")).join("");
-    sessionStorage.setItem("btk_pi_oauth_state",state);
-    const authorize=new URL("https://accounts.pinet.com/oauth/authorize");
-    authorize.searchParams.set("response_type","token"); authorize.searchParams.set("client_id",PI_CLIENT_ID);
-    authorize.searchParams.set("redirect_uri",PI_REDIRECT_URI); authorize.searchParams.set("scope","username");
-    authorize.searchParams.set("state",state); piStatus.textContent="Redirecting to Pi secure sign-in…";
-    window.location.assign(authorize.toString());
-  }catch(error){sessionStorage.removeItem("btk_pi_oauth_state");piStatus.textContent="Pi Sign-In could not start. Please refresh and try again.";}
+    if(!window.Pi || typeof window.Pi.authenticate!=="function"){
+      throw new Error("Pi SDK is unavailable. Open this Testnet app inside Pi Browser.");
+    }
+    const auth=await window.Pi.authenticate(["username"],()=>{});
+    if(!auth || typeof auth.accessToken!=="string" || !auth.accessToken){
+      throw new Error("Pi did not return a valid access token.");
+    }
+    const response=await fetch("/api/pi/verify",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      credentials:"same-origin",
+      body:JSON.stringify({accessToken:auth.accessToken})
+    });
+    const data=await response.json();
+    if(!response.ok || !data.verified || !data.user || !data.user.uid){
+      throw new Error(data.error||"Pi identity verification failed.");
+    }
+    showSignedIn(data.user.username||auth.user?.username||"");
+  }catch(error){
+    piButton.disabled=false;
+    piStatus.textContent=error && error.message ? error.message : "Pi Sign-In was cancelled or could not be completed. Please try again inside Pi Browser.";
+  }
 }
 async function logoutPi(){
   piButton.disabled=true; piStatus.textContent="Signing out…";
@@ -77,6 +93,7 @@ async function restorePiSession(){
     if(data.verified&&data.user&&data.user.uid) showSignedIn(data.user.username||""); else showSignedOut();
   }catch(error){showSignedOut("Unable to check your Pi session. Please refresh.");}
 }
+try{ window.Pi && window.Pi.init({version:"2.0",sandbox:true}); }catch(error){}
 showSignedOut(); restorePiSession();
 </script>
 </body></html>
