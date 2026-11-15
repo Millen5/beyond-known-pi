@@ -32,10 +32,12 @@ export async function onRequestPost({ request }) {
     if (!user || typeof user.uid !== "string" || !user.uid) {
       return Response.json({ verified: false, error: "Pi returned an invalid identity." }, { status: 502 });
     }
+    const headers = new Headers({ "Cache-Control": "no-store" });
+    headers.append("Set-Cookie", `btk_pi_session=${encodeURIComponent(accessToken)}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=86400`);
     return Response.json({
       verified: true,
       user: { uid: user.uid, username: typeof user.username === "string" ? user.username : "" }
-    }, { headers: { "Cache-Control": "no-store" } });
+    }, { headers });
   } catch {
     return Response.json({ verified: false, error: "Pi verification service is temporarily unavailable." }, {
       status: 502,
