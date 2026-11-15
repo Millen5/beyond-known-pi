@@ -23,7 +23,7 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 <body>
 <header><div class="wrap nav"><a class="brand" href="#home">✦ BEYOND <span>THE KNOWN</span></a><nav class="links" aria-label="Main navigation"><a href="#discover">Discover</a><a href="#about">About</a><a href="#pi">Pi Journey</a><a href="https://beyondknownstories.blogspot.com/" target="_blank" rel="noopener noreferrer">Blog ↗</a></nav></div></header>
 <main>
-<section class="hero" id="home"><div class="wrap"><div class="eyebrow">Knowledge · Innovation · Discovery</div><div class="testnet-banner" role="status">Testnet Preview · Experimental Environment</div><h1>Go <em>beyond</em> what you know.</h1><p class="lead">Explore the ideas shaping our universe and our future — from space and artificial intelligence to blockchain, financial literacy and the mysteries of our world.</p><div class="actions"><a class="btn gold" href="#discover">Explore Topics</a><a class="btn" href="https://beyondknownstories.blogspot.com/" target="_blank" rel="noopener noreferrer">Read the Blog ↗</a></div></div></section>
+<section class="hero" id="home"><div class="wrap"><div class="eyebrow">Knowledge · Innovation · Discovery</div><div class="testnet-banner" role="status">Testnet Preview · Experimental Environment</div><h1>Go <em>beyond</em> what you know.</h1><p class="lead">Explore the ideas shaping our universe and our future — from space and artificial intelligence to blockchain, financial literacy and the mysteries of our world.</p><div class="actions"><a class="btn gold" href="#discover">Explore Topics</a><a class="btn" href="https://beyondknownstories.blogspot.com/" target="_blank" rel="noopener noreferrer">Read the Blog ↗</a><button class="btn" id="pi-signin" type="button">Sign in with Pi</button></div></div></section>
 <section id="discover"><div class="wrap"><div class="eyebrow">Explore our universe</div><h2>Curiosity has no limits.</h2><p class="muted">Choose a field of discovery. Our articles and stories are published on the BEYOND THE KNOWN blog.</p><div class="grid">
 <a class="card" href="https://beyondknownstories.blogspot.com/search/label/Science%20%26%20Space"><div class="symbol">🌌</div><h3>Science &amp; Space</h3><p>Explore the universe, scientific breakthroughs and the questions that move discovery forward.</p></a>
 <a class="card" href="https://beyondknownstories.blogspot.com/search/label/Artificial%20Intelligence"><div class="symbol">🤖</div><h3>Artificial Intelligence</h3><p>Understand emerging technology, intelligent systems and their impact on everyday life.</p></a>
@@ -36,5 +36,18 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 <section id="pi"><div class="wrap"><div class="eyebrow">Building for the future</div><h2>Our Pi Ecosystem journey</h2><p class="muted">This is the BEYOND THE KNOWN Testnet preview environment for learning and discovery. It is separate from the Mainnet experience and is provided for testing only. Pi authentication, membership services and Pi payments will be introduced only after the required developer integration, server-side verification and testing are complete.</p><div class="pi-note"><strong>Security notice:</strong> BEYOND THE KNOWN will never ask you to enter or share your Pi Wallet passphrase. This website does not currently process Pi payments.</div></div></section>
 </main>
 <footer><div class="wrap foot"><span>© <span id="year">2026</span> BEYOND THE KNOWN</span><span>Educational content only · Not financial advice</span><span><a href="privacy.html">Privacy Policy</a></span></div></footer>
-<script>document.getElementById("year").textContent=new Date().getFullYear()</script>
+<script>
+document.getElementById("year").textContent=new Date().getFullYear();
+document.getElementById("pi-signin").addEventListener("click",()=>{
+  const state=Array.from(crypto.getRandomValues(new Uint8Array(32)),b=>b.toString(16).padStart(2,"0")).join("");
+  sessionStorage.setItem("btk_pi_oauth_state",state);
+  const url=new URL("https://accounts.pinet.com/oauth/authorize");
+  url.searchParams.set("response_type","token");
+  url.searchParams.set("client_id","l4gnS3cE9cZaYyZLeDnCk_SqandkVrsdxgvFWw9u98l");
+  url.searchParams.set("redirect_uri","https://beyond-known-pi.pages.dev/signin/callback.html");
+  url.searchParams.set("scope","username");
+  url.searchParams.set("state",state);
+  window.location.assign(url.toString());
+});
+</script>
 </body></html>
