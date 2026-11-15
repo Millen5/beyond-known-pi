@@ -43,40 +43,23 @@ const piStatus=document.getElementById("pi-auth-status");
 const piButton=document.getElementById("pi-signin");
 const PI_CLIENT_ID="I4gnS3cE9cZaYyZLeDnCk_SqandkVrsdxgvFWw9u98I";
 const PI_REDIRECT_URI="https://beyond-known-pi.pages.dev/signin/callback.html";
-let piReady=false;
-(async()=>{
-  if(!window.Pi||typeof window.Pi.init!=="function"||typeof window.Pi.signIn!=="function"){
-    piStatus.textContent="Pi Sign-In SDK is unavailable. Please open this page in Pi Browser and refresh.";
-    return;
-  }
-  try{
-    await window.Pi.init({version:"2.0"});
-    piReady=true;
-    piStatus.textContent="Pi Sign-In is ready. You can securely continue with Pi.";
-    piButton.disabled=false;
-  }catch(error){
-    piStatus.textContent="Pi Sign-In could not initialize. Please refresh and try again.";
-  }
-})();
-piButton.disabled=true;
+piButton.disabled=false;
+piStatus.textContent="Use Pi Sign-In to securely verify your Pi identity.";
 piButton.addEventListener("click",()=>{
-  if(!piReady||!window.Pi||typeof window.Pi.signIn!=="function"){
-    piStatus.textContent="Pi Sign-In is still initializing. Please wait and try again.";
-    return;
-  }
   try{
     const state=Array.from(crypto.getRandomValues(new Uint8Array(24)),b=>b.toString(16).padStart(2,"0")).join("");
     sessionStorage.setItem("btk_pi_oauth_state",state);
-    piStatus.textContent="Opening Pi authorization…";
-    window.Pi.signIn({
-      clientId:PI_CLIENT_ID,
-      redirectUri:PI_REDIRECT_URI,
-      scopes:["username"],
-      state
-    });
+    const authorize=new URL("https://accounts.pinet.com/oauth/authorize");
+    authorize.searchParams.set("response_type","token");
+    authorize.searchParams.set("client_id",PI_CLIENT_ID);
+    authorize.searchParams.set("redirect_uri",PI_REDIRECT_URI);
+    authorize.searchParams.set("scope","username");
+    authorize.searchParams.set("state",state);
+    piStatus.textContent="Redirecting to Pi secure sign-in…";
+    window.location.assign(authorize.toString());
   }catch(error){
     sessionStorage.removeItem("btk_pi_oauth_state");
-    piStatus.textContent=error&&error.message?error.message:"Pi Sign-In could not start. Please refresh and try again.";
+    piStatus.textContent="Pi Sign-In could not start. Please refresh and try again.";
   }
 });
 try{
