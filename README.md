@@ -18,8 +18,8 @@ The Cloudflare Pages project is connected only to this repository. The existing 
 - Responsive static website for desktop and mobile.
 - Topic links to the BEYOND THE KNOWN Blogger publication.
 - Explicit Testnet Preview banner to distinguish this branch from Mainnet.
-- Pi Testnet Sign-In uses the official Pi SDK and a Cloudflare Pages Function to verify access tokens with the Pi Platform API. This is an identity-verification preview only; payments, wallet transactions, and memberships are not active.
-- The legacy OAuth callback route remains disabled; the homepage uses the official Pi SDK flow instead.
+- Pi Sign-In uses the official Pi Sign-In OAuth helper (`Pi.signIn`) with the registered Testnet client ID and callback URL. The callback verifies the returned state and sends the short-lived access token to a Cloudflare Pages Function, which checks identity against the Pi Platform API. This is an identity-verification preview only; payments, wallet transactions, and memberships are not active.
+- The callback route is active for the Pi Sign-In OAuth implicit flow; it validates the state value, removes the token fragment from browser history, and verifies the token server-side.
 - No wallet passphrase, private key, or server secret is requested or stored by this static site.
 - The public Testnet preview was checked after deployment. The homepage and Pi SDK readiness status loaded; Pi approval still needs a fresh end-to-end test in Pi Browser.
 
@@ -37,7 +37,7 @@ The Cloudflare Pages project is connected only to this repository. The existing 
 
 ## Pi integration and safety
 
-Pi Sign-In is wired as a Testnet identity-verification preview using the official SDK and a server-side `/api/pi/verify` function. The UI reports when approval is pending, when a token is being verified, and if the SDK does not return within 60 seconds. End-to-end testing inside Pi Browser is still required. Payments and wallet transactions are not implemented. The Pi Server API Key must remain server-side and must never be committed or placed in browser JavaScript. Never request or collect a visitor's Pi Wallet passphrase.
+Pi Sign-In is wired as a Testnet identity-verification preview using the official `Pi.signIn` OAuth helper and a server-side `/api/pi/verify` function. The callback validates OAuth state, then the backend verifies the access token through `/v2/me`. End-to-end testing inside Pi Browser is still required. Payments and wallet transactions are not implemented. The Pi Server API Key must remain server-side and must never be committed or placed in browser JavaScript. Never request or collect a visitor's Pi Wallet passphrase.
 
 The frontend SDK alone is not sufficient: the backend must verify authentication with the Pi Platform API and handle payment approval and completion securely. See the official [Pi developer documentation](https://developers.minepi.com/docs/build-first-app/GettingStarted).
 
